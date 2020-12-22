@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
+import store from './store/store'
 import axios  from  'axios'
 // import  VueAxios  from 'vue-axios'
 Vue.config.productionTip = false
@@ -17,6 +18,7 @@ Vue.use(Antd);
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   // render: h => h(App),
   // VueAxios,

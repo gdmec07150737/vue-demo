@@ -6,7 +6,12 @@
       </a-input>
     </a-form-model-item>
     <a-form-model-item>
-      <a-input v-model="formInline.password" type="password" placeholder="Password">
+      <a-input v-model="formInline.password" type="password" placeholder="密码">
+        <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
+      </a-input>
+    </a-form-model-item>
+    <a-form-model-item>
+      <a-input v-model="formInline.confirmpassword" type="password" placeholder="确认密码">
         <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
       </a-input>
     </a-form-model-item>
@@ -16,7 +21,7 @@
         html-type="submit"
         :disabled="formInline.user === '' || formInline.password === ''"
       >
-        Log in
+        注册
       </a-button>
     </a-form-model-item>
   </a-form-model>
@@ -28,30 +33,42 @@ export default {
       formInline: {
         email: '',
         password: '',
+        confirmpassword: '',
       },
     };
   },
   methods: {
     handleSubmit(e) {
+      console.log(this.formInline.email);
+      console.log(this.formInline.password);
+      console.log(this.formInline.confirmpassword);
+      if(this.formInline.email == '') {
+        alert('邮箱不能为空!')
+        return false;
+      }
+
+      if(this.formInline.password == '' | this.formInline.confirmpassword == '') {
+        alert('请输入密码')
+        return false;
+      }
+
+      if(this.formInline.password !== this.formInline.confirmpassword) {
+        alert('密码和确认密码不一致')
+        return false;
+      }
       this.$axios({
           method:'post',
-          url:'http://127.0.0.1:9501/user/login',
+          url:'http://127.0.0.1:9501/user/registered',
           data:{
                 email:this.formInline.email,
-                password:this.formInline.password,
+                password:this.formInline.password
           }
       }).then((response) =>{
-          this.$store.commit('setAuthorization', response.data.token)
-          this.$store.commit('login', true)
-          this.$store.commit('setId', response.data.id)
-          localStorage.setItem('authorization',response.data.token)
-          localStorage.setItem('id',response.data.id)
           this.$router.push({
-            path: 'index',
+            path: 'login',
           });
       }).catch((error) =>{
-          alert('请输入正确的用户名和密码！')
-          //console.log(error.response.data)       //请求失败返回的数据
+          alert(error.response.data)
       })
     },
   },
