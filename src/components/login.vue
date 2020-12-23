@@ -46,6 +46,7 @@ export default {
           this.$store.commit('setId', response.data.id)
           localStorage.setItem('authorization',response.data.token)
           localStorage.setItem('id',response.data.id)
+          localStorage.setItem('login',true)
           this.$router.push({
             path: 'index',
           });

@@ -36,9 +36,9 @@
         <a-button type="danger">删除</a-button>
         </a-popconfirm>
         &nbsp;&nbsp;&nbsp;
-        <a-button type="danger"  @click="handleEdit(record)" >
+        <!-- <a-button type="danger"  @click="handleEdit(record)" >
             编辑
-        </a-button>
+        </a-button> -->
       </template>
     </a-table>
   </div>
@@ -142,7 +142,14 @@ export default {
     };
   },
   created: function () {
-      console.log(this.$store.state.authorization);
+          //没有登录就退出
+          console.log(localStorage.getItem('login'));
+      if(localStorage.getItem('login') == 'false'){
+        this.$router.push({
+            path: 'login',
+        });
+      }
+      
       if(this.$store.state.authorization == '') {
           this.$store.commit('setAuthorization', localStorage.getItem('authorization'))
       }
@@ -163,13 +170,14 @@ export default {
     Logout(){
       this.$axios({
         method:'get',
-        url:'http://127.0.0.1:9501/user/logout?id=' + this.$store.getters.getId,
+        url:'http://127.0.0.1:9501/user/logout?id=' + localStorage.getItem('id'),
         headers: {'authorization': this.$store.getters.getAuthorization}
       }).then((response) =>{ 
           alert('退出登录成功！')
           this.$store.commit('setAuthorization', '')
           this.$store.commit('login', false)
           localStorage.setItem('authorization','')
+          localStorage.setItem('login',false)
           this.$router.push({
             path: 'login',
           });
