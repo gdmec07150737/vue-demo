@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="components-input-demo-size">
-        <a-input-search placeholder="input email" v-model="value" style="width: 200px" @search="onSearch" />
+        <a-input-search placeholder="输入邮箱" v-model="value" style="width: 200px" @search="onSearch" />
         <a-input v-show="ok" placeholder="邮箱" v-model="email"/>
         <a-input-password v-show="ok" placeholder="密码" v-model="password"/>
         <a-input-password v-show="ok" placeholder="确认密码" v-model="confirmpassword"/>
@@ -36,9 +36,28 @@
         <a-button type="danger">删除</a-button>
         </a-popconfirm>
         &nbsp;&nbsp;&nbsp;
-        <!-- <a-button type="danger"  @click="handleEdit(record)" >
-            编辑
-        </a-button> -->
+        <a-button type="primary" @click="showModal(record.id)">
+          编辑
+        </a-button>
+        <a-modal
+          title="Title"
+          :visible="visible"
+          :confirm-loading="confirmLoading"
+          @ok="update_userinfo"
+          @cancel="handleCancel"
+        >
+          <a-input v-show="false" v-model="user_id"/>
+          新邮箱：<a-input placeholder="邮箱" v-model="update_email"/>
+          新密码<a-input-password placeholder="密码" v-model="update_password"/>
+          用户状态：<a-radio-group v-model="update_state">
+            <a-radio :value="1">
+              正常
+            </a-radio>
+            <a-radio :value="2">
+              异常
+            </a-radio>
+          </a-radio-group>
+        </a-modal>
       </template>
     </a-table>
   </div>
@@ -89,6 +108,12 @@ export default {
   },
   data() {
     return {
+      user_id: 0,
+      update_email: '',
+      update_password: '',
+      update_state: 1,
+      visible: false,
+      confirmLoading: false,
       pagination: {
         total: 0,
         pageSize: 2,
@@ -141,9 +166,9 @@ export default {
       ],
     };
   },
+
   created: function () {
-          //没有登录就退出
-          console.log(localStorage.getItem('login'));
+      //没有登录就退出
       if(localStorage.getItem('login') == 'false'){
         this.$router.push({
             path: 'login',
@@ -162,11 +187,71 @@ export default {
         this.pagination.total = response.data.data.total
         this.pagination.pageSize = response.data.data.per_page
       }).catch((error) =>{
-          //console.log(error.response.data)
+          
       })
   },
   methods: {
 
+    //获取用户的信息
+    showModal(id) {
+      this.$axios({
+          method:'get',
+          url:'http://127.0.0.1:9501/user/get_user?id=' + id,
+          headers: {'authorization': this.$store.getters.getAuthorization}
+      }).then((response) =>{
+        this.user_id = response.data.data.id
+        this.update_email = response.data.data.email
+        this.update_password = ''
+        this.update_state = (response.data.data.state == 'normal') ? 1 : 2
+        this.visible = true;
+      }).catch((error) =>{
+          alert(error.response.data.msg)
+          return false;
+      })
+    },
+
+    //修改用户信息
+    update_userinfo(e) {
+      if(this.update_email == '' || this.update_password=='' || this.update_state == '') {
+          alert('请填写完整用户新的信息')
+          return false
+      }
+      this.confirmLoading = true;
+      this.$axios({
+          method:'post',
+          url:'http://127.0.0.1:9501/user/update_user',
+          data:{
+              id:this.user_id,
+              email:this.update_email,
+              password:this.update_password,
+              state: (this.update_state == 1) ? 'normal' : 'abnormal',
+          },
+          headers: {'authorization': this.$store.getters.getAuthorization}
+      }).then((response) =>{
+          this.onSearch()
+          alert('修改用户信息成功!')
+      }).catch((error) =>{
+          alert(error.response.data.msg)
+      })
+      this.user_id = 0
+      this.update_email = ''
+      this.update_password = ''
+      this.update_state = 1
+      this.visible = false;
+      this.confirmLoading = false;
+      console.log(111);
+    },
+
+    //取消修改用户信息
+    handleCancel(e) {
+        this.user_id = 0
+        this.update_email = ''
+        this.update_password = ''
+        this.update_state = 1
+        this.visible = false;
+    },
+
+    //退出登录
     Logout(){
       this.$axios({
         method:'get',
@@ -182,23 +267,24 @@ export default {
             path: 'login',
           });
       }).catch((error) =>{
-        //console.log(error.response.data)
+          alert(error.response.data.msg)
       })
     },
 
-      //分页查询
+    //分页查询
     ChangeTable(pagination) {
       this.queryParam.page = pagination.current;
       this.$axios({
         method:'get',
-        url:'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=' + this.queryParam.page + '&email' + this.value,
+        url:'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=' + this.queryParam.page + '&email=' + this.value,
         headers: {'authorization': this.$store.getters.getAuthorization}
-      }).then((response) =>{ 
+      }).then((response) =>{
+        this.pagination.total = response.data.data.total
         const pagination = { ...this.pagination };
         this.dataSource = response.data.data.data
         this.pagination = pagination;
       }).catch((error) =>{
-        //console.log(error.response.data)
+        alert(error.response.data.msg)
       })
       this.loading = false;
     },
@@ -217,17 +303,17 @@ export default {
         this.$message.success('修改用户状态成功');
         this.onSearch()
       }).catch((error) =>{
-        //console.log(error.response.data)
+        alert(error.response.data.msg)
       })
     },
 
     //搜索功能
     onSearch(value) {
-        var url = ''
+      var url = ''
       if(typeof(value)=="undefined") {
-          url = 'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=1'
+          url = 'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=' + this.queryParam.page
       }else {
-          url = 'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=1&email=' + value;
+          url = 'http://127.0.0.1:9501/user/select_or_query?perPage=2&page='+this.queryParam.page+'&email=' + value;
       }
       
       this.$axios({
@@ -240,7 +326,7 @@ export default {
         this.dataSource = response.data.data.data
         this.pagination = pagination;
       }).catch((error) =>{
-        //console.log(error.response.data)
+        alert(error.response.data.msg)
       })
     },
 
@@ -289,15 +375,7 @@ export default {
             },
             headers: {'authorization': this.$store.getters.getAuthorization}
         }).then((response) =>{
-            this.$axios({
-                method:'get',
-                url:'http://127.0.0.1:9501/user/select_or_query?perPage=3&page=1',
-                headers: {'authorization': this.$store.getters.getAuthorization}
-            }).then((response) =>{ 
-                this.onSearch()
-            }).catch((error) =>{
-                //console.log(error.response.data)
-            })
+            this.onSearch()
         }).catch((error) =>{
             alert(error.response.data.msg) 
         })

@@ -51,8 +51,7 @@ export default {
             path: 'index',
           });
       }).catch((error) =>{
-          alert('请输入正确的用户名和密码！')
-          //console.log(error.response.data)       //请求失败返回的数据
+          alert(error.response.data.msg)
       })
     },
   },
