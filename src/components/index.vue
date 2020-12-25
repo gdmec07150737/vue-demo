@@ -187,7 +187,12 @@ export default {
         this.pagination.total = response.data.data.total
         this.pagination.pageSize = response.data.data.per_page
       }).catch((error) =>{
-          
+        alert(error.response.data.msg)
+        if (error.response.data.code == 401) {
+          this.$router.push({
+            path: 'login',
+          });
+        }
       })
   },
   methods: {
@@ -206,6 +211,11 @@ export default {
         this.visible = true;
       }).catch((error) =>{
           alert(error.response.data.msg)
+          if (error.response.data.code == 401) {
+            this.$router.push({
+              path: 'login',
+            });
+          }
           return false;
       })
     },
@@ -232,6 +242,11 @@ export default {
           alert('修改用户信息成功!')
       }).catch((error) =>{
           alert(error.response.data.msg)
+          if (error.response.data.code == 401) {
+            this.$router.push({
+              path: 'login',
+            });
+          }
       })
       this.user_id = 0
       this.update_email = ''
@@ -268,6 +283,11 @@ export default {
           });
       }).catch((error) =>{
           alert(error.response.data.msg)
+          if (error.response.data.code == 401) {
+            this.$router.push({
+              path: 'login',
+            });
+          }
       })
     },
 
@@ -285,6 +305,11 @@ export default {
         this.pagination = pagination;
       }).catch((error) =>{
         alert(error.response.data.msg)
+        if (error.response.data.code == 401) {
+          this.$router.push({
+            path: 'login',
+          });
+        }
       })
       this.loading = false;
     },
@@ -304,6 +329,11 @@ export default {
         this.onSearch()
       }).catch((error) =>{
         alert(error.response.data.msg)
+        if (error.response.data.code == 401) {
+          this.$router.push({
+            path: 'login',
+          });
+        }
       })
     },
 
@@ -327,6 +357,11 @@ export default {
         this.pagination = pagination;
       }).catch((error) =>{
         alert(error.response.data.msg)
+        if (error.response.data.code == 401) {
+          this.$router.push({
+            path: 'login',
+          });
+        }
       })
     },
 
@@ -339,7 +374,12 @@ export default {
         }).then((response) =>{
             this.onSearch()
         }).catch((error) =>{
-            alert(error.response.data.msg) 
+            alert(error.response.data.msg)
+            if (error.response.data.code == 401) {
+              this.$router.push({
+                path: 'login',
+              });
+            }
         })
     },
 
@@ -377,7 +417,12 @@ export default {
         }).then((response) =>{
             this.onSearch()
         }).catch((error) =>{
-            alert(error.response.data.msg) 
+            alert(error.response.data.msg)
+            if (error.response.data.code == 401) {
+              this.$router.push({
+                path: 'login',
+              });
+            }
         })
       
     },
