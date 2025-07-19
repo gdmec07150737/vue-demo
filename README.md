@@ -5,6 +5,9 @@
 ## Build Setup
 
 ``` bash
+# 环境依赖
+# 1.  node v14.21.3
+# 2.  npm 6.14.18
 # install dependencies
 npm install
 

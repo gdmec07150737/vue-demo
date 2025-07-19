@@ -180,7 +180,7 @@ export default {
       }
       this.$axios({
           method:'get',
-          url:'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=1',
+          url:'http://127.0.0.1:9501/user/select_or_query?perPage=2&page=0',
           headers: {'authorization': this.$store.getters.getAuthorization}
       }).then((response) =>{
         this.dataSource = response.data.data.data
